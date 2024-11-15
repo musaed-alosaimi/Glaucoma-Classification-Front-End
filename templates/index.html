@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css" />
+    <title>Document</title>
+  </head>
+  <body class="row">
+    <form
+      id="mainForm"
+      method="POST"
+      enctype="multipart/form-data"
+      class="col col-xs-10 offset-xs-1 col-md-6 offset-md-3 p-5"
+    >
+      <div class="mb-3">
+        <label for="uploadImage" class="form-label">Upload image</label>
+        <input
+          type="file"
+          name="file"
+          class="form-control"
+          id="uploadImage"
+          aria-describedby="uploadImageHint"
+        />
+        <div id="uploadImageHint" class="form-text">
+          Upload an image to analyze it.
+        </div>
+      </div>
+      <button class="btn btn-primary">
+        Upload
+      </button>
+
+      <h3 id="resultTextContainer" style="display: none; padding: 20px;">
+        The image represents <strong id="resultText"></strong> case.
+      </h3>
+    </form>
+  </body>
+
+  <script src="../static/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    const mainForm = document.getElementById("mainForm");
+    const fileField = document.getElementById("uploadImage");
+
+    let uploadedFile = null;
+
+    fileField.addEventListener("change", (event) => {
+      uploadedFile = fileField.files[0];
+
+      console.log("uploadedFile: " + uploadedFile);
+    });
+
+    mainForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      submitRequest();
+    });
+
+    function submitRequest() {
+      // Make sure a file is selected
+      if (fileField.files.length === 0) {
+        alert("Please select a file!");
+        return "";
+      }
+      
+      const formData = new FormData();
+      formData.append("file", uploadedFile);
+
+      fetch("http://localhost:8090/predict", {
+        method: "POST",
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((res) => {
+
+            const {error, data} = res.result;
+
+            console.log(res);
+
+            if(error !== null){
+                console.error(error);
+                return;
+            }
+
+            document.getElementById('resultTextContainer').style.display = 'block';
+            document.getElementById('resultText').innerText = data;
+
+            console.log(res);
+        });
+
+
+    }
+
+  </script>
+</html>
